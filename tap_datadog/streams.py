@@ -8,11 +8,11 @@ from typing import Any, Dict, Optional, Union, List, Iterable
 
 
 from singer import metrics, utils, metadata, Transformer
-from singer_sdk import typing as th  # JSON Schema typing helpers
+
 
 # from .http import Paginator,DatadogNotFoundError
 from .context import Context
-from tap_datadog.client import Stream
+
 
 
 LOGGER = singer.get_logger()
@@ -51,7 +51,7 @@ class Stream():
         with metrics.record_counter(self.tap_stream_id) as counter:
             counter.increment(len(page))
 
-class event_logs(Stream):
+class Event_logs(Stream):
     def sync(self):
         print("###PR###")
         print(Context.config)
@@ -79,6 +79,14 @@ class event_logs(Stream):
         
         self.write_page(types)
         singer.write_state(Context.state)
+
+
+EVENTLOGS = Event_logs("eventlogs", ["id"])
+
+ALL_STREAMS = [EVENTLOGS]
+
+ALL_STREAM_IDS = [s.tap_stream_id for s in ALL_STREAMS]
+
 
 
 # class event_logs_old(Stream):

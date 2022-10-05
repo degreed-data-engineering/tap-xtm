@@ -6,12 +6,12 @@ from singer_sdk import Tap, Stream
 from singer_sdk import typing as th  # JSON schema typing helpers
 # TODO: Import your custom stream types here:
 from tap_datadog.streams import (
-    event_logs,
+    Event_logs,
 )
 # TODO: Compile a list of custom stream types here
 #       OR rewrite discover_streams() below with your custom logic.
 STREAM_TYPES = [
-    event_logs,
+    Event_logs,
 ]
 
 
