@@ -155,7 +155,7 @@ class Client():
         # self.user_agent = config.get("user_agent")
         # self.login_timer = None
         # self.timeout = get_request_timeout(config)
-
+        self.login_timer = None
         # Assign False for cloud Datadog instance
         # self.is_on_prem_instance = False
 
