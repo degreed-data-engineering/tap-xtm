@@ -12,7 +12,7 @@ from singer import metrics, utils, metadata, Transformer
 
 # from .http import Paginator,DatadogNotFoundError
 from .context import Context
-from tap_datadog.client import Stream
+
 
 
 LOGGER = singer.get_logger()
