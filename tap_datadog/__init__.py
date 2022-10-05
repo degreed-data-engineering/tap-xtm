@@ -124,9 +124,9 @@ def main():
             print()
         else:
             sync()
-    finally:
-        if Context.client and Context.client.login_timer:
-            Context.client.login_timer.cancel()
+    # finally:
+    #     if Context.client and Context.client.login_timer:
+    #         Context.client.login_timer.cancel()
 
 
 if __name__ == "__main__":
