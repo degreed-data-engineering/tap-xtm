@@ -2,16 +2,14 @@
 import json
 import pytz
 import singer
-
-from pathlib import Path
-from typing import Any, Dict, Optional, Union, List, Iterable
-
+import dateparser
 
 from singer import metrics, utils, metadata, Transformer
+from .context import Context
+from .http import Paginator
 
 
 # from .http import Paginator,DatadogNotFoundError
-from .context import Context
 
 
 
@@ -53,16 +51,14 @@ class Stream():
 
 class Event_logs(Stream):
     def sync(self):
-        print("###PR###")
-        print(Context.config)
-        query = Context.config.get("query")
+        # query = Context.config.get("query")
 
-        updated_bookmark = [self.tap_stream_id, "updated"]
-        page_num_offset = [self.tap_stream_id, "offset", "page_num"]
+        # updated_bookmark = [self.tap_stream_id, "updated"]
+        # page_num_offset = [self.tap_stream_id, "offset", "page_num"]
 
-        last_updated = Context.update_start_date_bookmark(updated_bookmark)
-        timezone = Context.retrieve_timezone()
-        start_date = last_updated.astimezone(pytz.timezone(timezone)).strftime("%Y-%m-%d %H:%M")
+        # last_updated = Context.update_start_date_bookmark(updated_bookmark)
+        # timezone = Context.retrieve_timezone()
+        # start_date = last_updated.astimezone(pytz.timezone(timezone)).strftime("%Y-%m-%d %H:%M")
 
 
         params = json.dumps({
@@ -75,6 +71,9 @@ class Event_logs(Stream):
                 "limit": 10
             }
         })
+
+        print("###PR### params")
+        print(params)
         types = Context.client.request(self.tap_stream_id, "POST", path='/api/v2/logs/events/search', params=params)
         
         self.write_page(types)

@@ -13,12 +13,11 @@ LOGGER = singer.get_logger()
 REQUIRED_CONFIG_KEYS_HOSTED = ["start_date",
                                "api_key",
                                "app_key",
-                               "base_url",
-                               ]
+                               "base_url"]
 
 
 def get_args():
-
+    unchecked_args = utils.parse_args([])
     return utils.parse_args(REQUIRED_CONFIG_KEYS_HOSTED)
 
 
@@ -75,7 +74,7 @@ def output_schema(stream):
 
 
 def sync():
-    streams_.validate_dependencies()
+
 
 
     # two loops through streams are necessary so that the schema is output
@@ -104,20 +103,24 @@ def sync():
 def main():
     args = get_args()
 
+    print("###PR### args")
+    print(args)
     datadog_config = args.config
+    print("###PR### DATADOG CONFIG")
+    print(datadog_config)
     # datadog client instance
     datadog_client = Client(datadog_config)
 
     # Setup Context
     Context.client = datadog_client
+    print(args.properties)
     catalog = Catalog.from_dict(args.properties) \
         if args.properties else discover()
+
     Context.config = datadog_config
     Context.state = args.state
     Context.catalog = catalog
-
-    print("###PR - __init__.py###")
-    print(Context.config)
+    
     try:
         if args.discover:
             discover().dump()
@@ -127,6 +130,7 @@ def main():
     finally:
         if Context.client and Context.client.login_timer:
             Context.client.login_timer.cancel()
+
 
 
 if __name__ == "__main__":
