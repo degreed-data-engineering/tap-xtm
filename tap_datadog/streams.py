@@ -2,9 +2,7 @@
 import json
 import pytz
 import singer
-
-from pathlib import Path
-from typing import Any, Dict, Optional, Union, List, Iterable
+import dateparser
 
 from singer import metrics, utils, metadata, Transformer
 from .context import Context
@@ -53,8 +51,6 @@ class Stream():
 
 class Event_logs(Stream):
     def sync(self):
-        print("###PR###")
-        print(Context.config)
         query = Context.config.get("query")
 
         updated_bookmark = [self.tap_stream_id, "updated"]
