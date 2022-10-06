@@ -13,8 +13,7 @@ LOGGER = singer.get_logger()
 REQUIRED_CONFIG_KEYS_HOSTED = ["start_date",
                                "api_key",
                                "app_key",
-                               "base_url",
-                               ]
+                               "base_url"]
 
 
 def get_args():

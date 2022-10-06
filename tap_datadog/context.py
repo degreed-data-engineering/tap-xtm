@@ -1,6 +1,6 @@
 from datetime import datetime
 from singer import utils, metadata
-from .http import check_status
+
 
 
 class Context():
@@ -42,20 +42,3 @@ class Context():
         if isinstance(val, datetime):
             val = utils.strftime(val)
         cls.bookmark(path[:-1])[path[-1]] = val
-
-    @classmethod
-    def update_start_date_bookmark(cls, path):
-        val = cls.bookmark(path)
-        if not val:
-            val = cls.config["start_date"]
-            val = utils.strptime_to_utc(val)
-            cls.set_bookmark(path, val)
-        if isinstance(val, str):
-            val = utils.strptime_to_utc(val)
-        return val
-
-    @classmethod
-    def retrieve_timezone(cls):
-        response = cls.client.send("GET", "/rest/api/2/myself")
-        check_status(response)
-        return response.json()["timeZone"]
