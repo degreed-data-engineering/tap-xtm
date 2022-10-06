@@ -104,6 +104,8 @@ def sync():
 def main():
     args = get_args()
 
+    print("###PR### args")
+    print(args)
     datadog_config = args.config
     print("###PR### DATADOG CONFIG")
     print(datadog_config)

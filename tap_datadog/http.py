@@ -149,7 +149,7 @@ def get_request_timeout(config):
 
 class Client():
     def __init__(self, config):
-
+        print("###PR### CLIENT INIT")
         self.session = requests.Session()
         self.next_request_at = datetime.now()
         # self.user_agent = config.get("user_agent")
