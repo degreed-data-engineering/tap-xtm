@@ -116,6 +116,8 @@ def main():
     Context.client = datadog_client
     catalog = Catalog.from_dict(args.properties) \
         if args.properties else discover()
+    print("###PR### catalog:")
+    print(catalog)
     Context.config = datadog_config
     Context.state = args.state
     Context.catalog = catalog
