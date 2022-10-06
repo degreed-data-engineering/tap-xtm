@@ -5,7 +5,7 @@ setup(name = "tap-template",
     version = 0.1,
     description = "a simple table-access-protocol interface for python",
 
-    author = "Morgan Fouesneau",
+    author = "Bryan Rose",
     author_email = "",
     url = "https://github.com/degreed-data-engineering/tap-template",
     packages = find_packages(),
