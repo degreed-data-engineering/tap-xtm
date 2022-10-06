@@ -18,7 +18,7 @@ REQUIRED_CONFIG_KEYS_HOSTED = ["start_date",
 
 
 def get_args():
-
+    unchecked_args = utils.parse_args([])
     return utils.parse_args(REQUIRED_CONFIG_KEYS_HOSTED)
 
 
@@ -116,8 +116,7 @@ def main():
     Context.state = args.state
     Context.catalog = catalog
 
-    print("###PR - __init__.py###")
-    print(Context.config)
+
 
     if args.discover:
         discover().dump()

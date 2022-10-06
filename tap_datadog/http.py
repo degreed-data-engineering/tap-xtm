@@ -150,8 +150,8 @@ def get_request_timeout(config):
 class Client():
     def __init__(self, config):
 
-        # self.session = requests.Session()
-        # self.next_request_at = datetime.now()
+        self.session = requests.Session()
+        self.next_request_at = datetime.now()
         # self.user_agent = config.get("user_agent")
         # self.login_timer = None
         # self.timeout = get_request_timeout(config)
@@ -181,7 +181,8 @@ class Client():
         headers["DD-APPLICATION-KEY"] = self.app_key
         headers["Content-Type"] = 'application/json'
         headers["Accept"] = 'application/json'
-
+        print('###HEADERS###')
+        print(headers)
         return headers
 
     def send(self, method, path, headers={}, **kwargs):
@@ -192,44 +193,54 @@ class Client():
                                     **kwargs)
         return self.session.send(request.prepare())
 
+    def request(self, tap_stream_id, *args, **kwargs):
+        wait = (self.next_request_at - datetime.now()).total_seconds()
+        if wait > 0:
+            time.sleep(wait)
+        with metrics.http_request_timer(tap_stream_id) as timer:
+            response = self.send(*args, **kwargs)
+            self.next_request_at = datetime.now() + TIME_BETWEEN_REQUESTS
+            timer.tags[metrics.Tag.http_status_code] = response.status_code
+        check_status(response)
+        return response.json()
 
-# class Paginator():
-#     def __init__(self, client, page_num=0, order_by=None, items_key="values"):
-#         self.client = client
-#         self.next_page_num = page_num
-#         self.order_by = order_by
-#         self.items_key = items_key
+class Paginator():
+    def __init__(self, client, page_num=0, order_by=None, items_key="values"):
+        self.client = client
+        self.next_page_num = page_num
+        self.order_by = order_by
+        self.items_key = items_key
 
-#     def pages(self, *args, **kwargs):
-#         """Returns a generator which yields pages of data. When a given page is
-#         yielded, the next_page_num property can be used to know what the index
-#         of the next page is (useful for bookmarking).
+    def pages(self, *args, **kwargs):
+        """Returns a generator which yields pages of data. When a given page is
+        yielded, the next_page_num property can be used to know what the index
+        of the next page is (useful for bookmarking).
 
-#         :param args: Passed to Client.request
-#         :param kwargs: Passed to Client.request
-#         """
-#         params = kwargs.pop("params", {}).copy()
-#         while self.next_page_num is not None:
-#             params["startAt"] = self.next_page_num
-#             if self.order_by:
-#                 params["orderBy"] = self.order_by
-#             response = self.client.request(*args, params=params, **kwargs)
-#             if self.items_key:
-#                 page = response[self.items_key]
-#             else:
-#                 page = response
+        :param args: Passed to Client.request
+        :param kwargs: Passed to Client.request
+        """
+        params = kwargs.pop("params", {}).copy()
+        while self.next_page_num is not None:
+            params["startAt"] = self.next_page_num
+            if self.order_by:
+                params["orderBy"] = self.order_by
+            response = self.client.request(*args, params=params, **kwargs)
+            if self.items_key:
+                page = response[self.items_key]
+            else:
+                page = response
 
-#             # Accounts for responses that don't nest their results in a
-#             # key by falling back to the params `maxResults` setting.
-#             if 'maxResults' in response:
-#                 max_results = response['maxResults']
-#             else:
-#                 max_results = params['maxResults']
+            # Accounts for responses that don't nest their results in a
+            # key by falling back to the params `maxResults` setting.
+            if 'maxResults' in response:
+                max_results = response['maxResults']
+            else:
+                max_results = params['maxResults']
 
-#             if len(page) < max_results:
-#                 self.next_page_num = None
-#             else:
-#                 self.next_page_num += max_results
+            if len(page) < max_results:
+                self.next_page_num = None
+            else:
+                self.next_page_num += max_results
 
-#             if page:
-#                 yield page
+            if page:
+                yield page

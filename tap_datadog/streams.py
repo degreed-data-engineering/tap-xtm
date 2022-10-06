@@ -6,12 +6,12 @@ import singer
 from pathlib import Path
 from typing import Any, Dict, Optional, Union, List, Iterable
 
-
 from singer import metrics, utils, metadata, Transformer
+from .context import Context
+from .http import Paginator
 
 
 # from .http import Paginator,DatadogNotFoundError
-from .context import Context
 
 
 
