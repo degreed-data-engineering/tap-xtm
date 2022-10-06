@@ -105,6 +105,8 @@ def main():
     args = get_args()
 
     datadog_config = args.config
+    print("###PR### DATADOG CONFIG")
+    print(datadog_config)
     # datadog client instance
     datadog_client = Client(datadog_config)
 
