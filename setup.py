@@ -3,9 +3,9 @@ from setuptools import setup, find_packages
 
 setup(name = "tap-template",
     version = 0.1,
-    description = "a simple table-access-protocol interface for python",
+    description = "Template for Degreed taps in Meltano",
 
-    author = "Bryan Rose",
+    author = "Degreed",
     author_email = "",
     url = "https://github.com/degreed-data-engineering/tap-template",
     packages = find_packages(),
