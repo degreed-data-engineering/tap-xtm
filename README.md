@@ -1,118 +1,62 @@
-# tap-datadog
+# `tap-template`
+Tap was created by [AutoIDM](https://autoidm.com). Check us out for tap/target creation, maintenace, support, and more!
 
-`tap-datadog` is a Singer tap for MySourceName_sample.
+## Capabilities
 
-Built with the [Meltano Tap SDK](https://sdk.meltano.com) for Singer Taps.
+* `catalog`
+* `state`
+* `discover`
+* `about`
+* `stream-maps`
 
-<!--
+## Settings
+| Setting       | Required | Default | Description |
+|:--------------|:--------:|:-------:|:------------|
+| auth_token    | True     | None    | Token gathered from template, instructions are [here](https://documentation.template.com/docs#section-authentication) |
+| subdomain     | True     | None    | subdomain from template |
+| custom_reports| False    | None    | CustomReport full body definition, example in meltano.yml, same format as the Body for the POST request [here](https://documentation.template.com/reference/request-custom-report-1) |
 
-Developer TODO: Update the below as needed to correctly describe the install procedure. For instance, if you do not have a PyPi repo, or if you want users to directly install from your git repo, you can modify this step as appropriate.
+A full list of supported settings and capabilities is available by running: `tap-template --about`
 
-## Installation
 
-Install from PyPi:
+## Getting Started
+    ```bash
+    pipx install poetry
+    poetry install
+    ```
+    ```bash
+    poetry run tap-template --help
+    ```
+    ```bash
+    poetry run pytest
+    ```
+## Singer SDK Dev Guide
 
-```bash
-pipx install tap-datadog
-```
+See the [dev guide](../../docs/dev_guide.md) for more instructions on how to use the Singer SDK to 
+develop your own taps and targets.
 
-Install from GitHub:
-
-```bash
-pipx install git+https://github.com/ORG_NAME/tap-datadog.git@main
-```
-
--->
-
-## Configuration
+## Config Guide
 
 ### Accepted Config Options
 
-<!--
-Developer TODO: Provide a list of config options accepted by the tap.
-
-This section can be created by copy-pasting the CLI output from:
-
-```
-tap-datadog --about --format=markdown
-```
--->
-
-A full list of supported settings and capabilities for this
-tap is available by running:
-
-```bash
-tap-datadog --about
-```
-
-### Configure using environment variables
-
-This Singer tap will automatically import any environment variables within the working directory's
-`.env` if the `--config=ENV` is provided, such that config values will be considered if a matching
-environment variable is set either in the terminal context or in the `.env` file.
+- [ ] `TODO:` Provide a list of config options accepted by the tap.
 
 ### Source Authentication and Authorization
 
-<!--
-Developer TODO: If your tap requires special access on the source system, or any special authentication requirements, provide those here.
--->
-
-## Usage
-
-You can easily run `tap-datadog` by itself or in a pipeline using [Meltano](https://meltano.com/).
-
-### Executing the Tap Directly
-
-```bash
-tap-datadog --version
-tap-datadog --help
-tap-datadog --config CONFIG --discover > ./catalog.json
-```
-
-## Developer Resources
-
-Follow these instructions to contribute to this project.
-
-### Initialize your Development Environment
-
-```bash
-pipx install poetry
-poetry install
-```
-
-### Create and Run Tests
-
-Create tests within the `tap_datadog/tests` subfolder and
-  then run:
-
-```bash
-poetry run pytest
-```
-
-You can also test the `tap-datadog` CLI interface directly using `poetry run`:
-
-```bash
-poetry run tap-datadog --help
-```
+- [ ] `TODO:` If your tap requires special access on the source system, or any special authentication requirements, provide those here.
+This Singer-compliant tap was created using the [Singer SDK](https://gitlab.com/meltano/singer-sdk).
 
 ### Testing with [Meltano](https://www.meltano.com)
 
 _**Note:** This tap will work in any Singer environment and does not require Meltano.
-Examples here are for convenience and to streamline end-to-end orchestration scenarios._
 
-<!--
-Developer TODO:
-Your project comes with a custom `meltano.yml` project file already created. Open the `meltano.yml` and follow any "TODO" items listed in
-the file.
--->
-
-Next, install Meltano (if you haven't already) and any needed plugins:
+Install Meltano (if you haven't already) and any needed plugins:
 
 ```bash
 # Install meltano
 pipx install meltano
 # Initialize meltano within this directory
-cd tap-datadog
+cd tap-clickup
 meltano install
 ```
 
@@ -120,12 +64,11 @@ Now you can test and orchestrate using Meltano:
 
 ```bash
 # Test invocation:
-meltano invoke tap-datadog --version
+meltano invoke tap-clickup --version
 # OR run a test `elt` pipeline:
-meltano elt tap-datadog target-jsonl
+meltano elt tap-clickup target-jsonl
 ```
 
-### SDK Dev Guide
+### SDK
 
-See the [dev guide](https://sdk.meltano.com/en/latest/dev_guide.html) for more instructions on how to use the SDK to
-develop your own taps and targets.
+Built with the [Meltano SDK](https://sdk.meltano.com) for Singer Taps and Targets.

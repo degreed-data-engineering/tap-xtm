@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 
-setup(name="tap-datadog",
+setup(name="tap-template",
       version="1.0.0",
       description="Singer.io tap for extracting data from different 3rd party sources for Degreed ",
       author="Degreed",
       url="http://singer.io",
       classifiers=["Programming Language :: Python :: 3 :: Only"],
-      py_modules=["tap_datadog"],
+      py_modules=["tap_template"],
       install_requires=[
           "singer-python==5.12.1",
           "requests==2.20.0",
@@ -22,11 +22,11 @@ setup(name="tap-datadog",
       },
       entry_points="""
           [console_scripts]
-          tap-datadog=tap_datadog:main
+          tap-template=tap_template:main
       """,
-      packages=["tap_datadog"],
+      packages=["tap_template"],
       package_data = {
-          "schemas": ["tap_datadog/schemas/*.json"]
+          "schemas": ["tap_template/schemas/*.json"]
       },
       include_package_data=True,
 )
