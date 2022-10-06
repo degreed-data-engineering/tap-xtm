@@ -75,7 +75,7 @@ def output_schema(stream):
 
 
 def sync():
-    streams_.validate_dependencies()
+
 
 
     # two loops through streams are necessary so that the schema is output
