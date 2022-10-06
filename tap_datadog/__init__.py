@@ -115,14 +115,16 @@ def main():
     Context.config = datadog_config
     Context.state = args.state
     Context.catalog = catalog
-
-
-
-    if args.discover:
-        discover().dump()
-        print()
-    else:
-        sync()
+    
+    try:
+        if args.discover:
+            discover().dump()
+            print()
+        else:
+            sync()
+    finally:
+        if Context.client and Context.client.login_timer:
+            Context.client.login_timer.cancel()
 
 
 
