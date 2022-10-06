@@ -33,7 +33,6 @@ class TapTemplate(Tap):
 
         return streams
 
-cli = TapTemplate.cli
 
 # # # CLI Execution:
 cli = TapTemplate.cli
