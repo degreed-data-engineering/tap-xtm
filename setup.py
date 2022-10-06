@@ -1,32 +1,22 @@
-#!/usr/bin/env python
 from setuptools import setup, find_packages
 
-setup(name="tap-template",
-      version="1.0.0",
-      description="Singer.io tap for extracting data from different 3rd party sources for Degreed ",
-      author="Degreed",
-      url="http://singer.io",
-      classifiers=["Programming Language :: Python :: 3 :: Only"],
-      py_modules=["tap_template"],
-      install_requires=[
-          "singer-python==5.12.1",
-          "requests==2.20.0",
-          "dateparser"
+
+setup(name = "tap-template",
+    version = 0.1,
+    description = "a simple table-access-protocol interface for python",
+
+    author = "Morgan Fouesneau",
+    author_email = "",
+    url = "https://github.com/degreed-data-engineering/tap-template",
+    packages = find_packages(),
+    package_data = {},
+    include_package_data = True,
+    classifiers=[
+      'Development Status :: 3 - Alpha',
+      'Intended Audience :: Science/Research',
+      'Operating System :: OS Independent',
+      'Programming Language :: Python',
+      'Topic :: Scientific/Engineering :: Astronomy'
       ],
-      extras_require={
-          'dev': [
-              'pylint',
-              'nose',
-              'ipdb'
-          ]
-      },
-      entry_points="""
-          [console_scripts]
-          tap-template=tap_template:main
-      """,
-      packages=["tap_template"],
-      package_data = {
-          "schemas": ["tap_template/schemas/*.json"]
-      },
-      include_package_data=True,
+    zip_safe=False
 )

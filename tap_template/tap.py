@@ -33,8 +33,15 @@ class TapTemplate(Tap):
 
         return streams
 
+cli = TapTemplate.cli
 
-# # CLI Execution:
+# # # CLI Execution:
 # cli = TapTemplate.cli
-if __name__ == "__main":
-    TapTemplate.cli()
+# if __name__ == "__main":
+#     cli = TapTemplate.cli
+#     #TapTemplate.cli()
+
+def main():
+    
+if __name__ == '__main__':
+    main()
