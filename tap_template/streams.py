@@ -6,6 +6,7 @@ from typing import Dict, Optional, Any, Iterable
 from pathlib import Path
 from singer_sdk import typing
 from functools import cached_property
+from singer_sdk import typing as th
 from singer_sdk.streams import RESTStream
 from singer_sdk.authenticators import SimpleAuthenticator
 import requests
@@ -32,127 +33,134 @@ class TapTemplateStream(RESTStream):
 
     @property
     def authenticator(self):
-        ### API / APP Key
         http_headers = {}
-        http_headers["DD-API-KEY"] = self.config.get("api_key")
-        http_headers["DD-APPLICATION-KEY"] = self.config.get("app_key")
+
+        # If only api_token is provided, use "Basic 123456789abcdefghijklmnopqrstuv" authentication
+        if self.config.get("api_token") and not self.config.get("api_key") and not self.config.get("app_key"):
+            http_headers["Authorization"] = "Basic " +  self.config.get("api_token")
 
 
-        
-        ### Basic Auth
-        # http_headers = {}
-        # auth_token = self.config.get("auth_token")
-        # basic_auth = f"{auth_token}:sample"
-        # http_headers["Authorization"] = "Basic " + base64.b64encode(
-        #     basic_auth.encode("utf-8")
-        # ).decode("utf-8")
+        # If api and app keys are provided, and POST required:
+        if self.config.get("api_key") and self.config.get("app_key"):
+            http_headers["DD-API-KEY"] = self.config.get("api_key")
+            http_headers["DD-APPLICATION-KEY"] = self.config.get("app_key")
+
         return SimpleAuthenticator(stream=self, auth_headers=http_headers)
 
 class Events(TapTemplateStream):
-    name = "events"
-    path = "/api/v2/logs/events/search"
+    name = "events" # Stream name 
+    path = "/api/v2/logs/events/search" # API endpoint after base_url 
     primary_keys = ["id"]
-    records_jsonpath = "$.data[*]"
+    records_jsonpath = "$.data[*]" # https://jsonpath.com Use requests response json to identify the json path 
     replication_key = None
-    schema_filepath = SCHEMAS_DIR / "events.json"
-    rest_method = "POST"
+    #schema_filepath = SCHEMAS_DIR / "events.json"  # Optional: use schema_filepath with .json inside schemas/ 
 
-    # def get_url_params(
-    #     self, context: Optional[dict], next_page_token: Optional[Any]
-    # ) -> Dict[str, Any]:
+    # Optional: If using schema_filepath, remove the propertyList schema method below
+    schema = th.PropertiesList(
+        th.Property("id", th.NumberType),
+        th.Property("name", th.StringType),
+    ).to_dict()
+    # Overwrite GET here by updating rest_method
+    rest_method = "POST"
 
     def prepare_request_payload(
         self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Optional[dict]:
-        params = {"filter": {"query": "source:degreed.api env:production","from": self.config.get("start_date")},"page": {"limit": 4}}
-        # entity data
+        """Define request parameters to return"""
+        payload = {"filter": {"query": "source:degreed.api env:production","from": self.config.get("start_date")},"page": {"limit": 4}}
+        return payload
 
-        return params
-        # print(params)
-        # return params
-        #params = {"filter": {"query": "source:degreed.api env:production","from": "2022-10-06T07:16:17+01:00"},"page": {"limit": 1}}
-        return {"filter": {"query": "source:degreed.api env:production","from": "2022-10-06T07:16:17+01:00"},"page": {"limit": 1}}
-        #return {"format":"JSON"}
-# class Old(TapTemplateStream):
-#     name = "employees"
-#     path = "/employees/directory"
-#     primary_keys = ["id"]
-#     records_jsonpath = "$.employees[*]"
-#     replication_key = None
-#     schema_filepath = SCHEMAS_DIR / "directory.json"
+    # For passing url parameters: 
+    # def get_url_params(
+    #     self, context: Optional[dict], next_page_token: Optional[Any]
+    # ) -> Dict[str, Any]:
 
-# class CustomReport(TapTemplateStream):
-#     path = "/reports/custom"
-#     primary_keys = ["id"]
-#     records_jsonpath = "$.employees[*]"
-#     replication_key = None
-#     rest_method = "POST"
+
+
+
+
+
+### Template to use for new stream 
+# class TemplateStream(RESTStream):
+#     """Template stream class."""
+
+#     # TODO: Set the API's base URL here:
+#     url_base = "https://api.mysample.com"
+
+#     # OR use a dynamic url_base:
+#     # @property
+#     # def url_base(self) -> str:
+#     #     """Return the API URL root, configurable via tap settings."""
+#     #     return self.config["api_url"]
+
+#     records_jsonpath = "$[*]"  # Or override `parse_response`.
+#     next_page_token_jsonpath = "$.next_page"  # Or override `get_next_page_token`.
+
 #     @property
-#     def schema(self):
-#         list_of_fields = []
-#         for field in self.custom_report_config["fields"]:
-#             list_of_fields.append(typing.Property(field, typing.StringType))
-#         return typing.PropertiesList(*list_of_fields).to_dict()
+#     def authenticator(self) -> BasicAuthenticator:
+#         """Return a new authenticator object."""
+#         return BasicAuthenticator.create_for_stream(
+#             self,
+#             username=self.config.get("username"),
+#             password=self.config.get("password"),
+#         )
 
-
-#     def __init__(self, name, custom_report_config, *args, **kwargs):
-#         self.name = name
-#         self._custom_report_config = custom_report_config
-#         super().__init__(*args, **kwargs)
-    
 #     @property
-#     def custom_report_config(self):
-#         return self._custom_report_config
+#     def http_headers(self) -> dict:
+#         """Return the http headers needed."""
+#         headers = {}
+#         if "user_agent" in self.config:
+#             headers["User-Agent"] = self.config.get("user_agent")
+#         # If not using an authenticator, you may also provide inline auth headers:
+#         # headers["Private-Token"] = self.config.get("auth_token")
+#         return headers
+
+#     def get_next_page_token(
+#         self, response: requests.Response, previous_token: Optional[Any]
+#     ) -> Optional[Any]:
+#         """Return a token for identifying next page or None if no more pages."""
+#         # TODO: If pagination is required, return a token which can be used to get the
+#         #       next page. If this is the final page, return "None" to end the
+#         #       pagination loop.
+#         if self.next_page_token_jsonpath:
+#             all_matches = extract_jsonpath(
+#                 self.next_page_token_jsonpath, response.json()
+#             )
+#             first_match = next(iter(all_matches), None)
+#             next_page_token = first_match
+#         else:
+#             next_page_token = response.headers.get("X-Next-Page", None)
+
+#         return next_page_token
 
 #     def get_url_params(
 #         self, context: Optional[dict], next_page_token: Optional[Any]
 #     ) -> Dict[str, Any]:
-#         return {"format":"JSON"}
-    
+#         """Return a dictionary of values to be used in URL parameterization."""
+#         params: dict = {}
+#         if next_page_token:
+#             params["page"] = next_page_token
+#         if self.replication_key:
+#             params["sort"] = "asc"
+#             params["order_by"] = self.replication_key
+#         return params
+
 #     def prepare_request_payload(
 #         self, context: Optional[dict], next_page_token: Optional[Any]
 #     ) -> Optional[dict]:
 #         """Prepare the data payload for the REST API request.
 
-#         Args:
-#             context: Stream partition or context dictionary.
-#             next_page_token: Token, page number or any request argument to request the
-#                 next page of data.
-
-#         Returns:
-#             Dictionary with the body to use for the request.
+#         By default, no payload will be sent (return None).
 #         """
-#         return self.custom_report_config
+#         # TODO: Delete this method if no payload is required. (Most REST APIs.)
+#         return None
 
-# #A more generic tables stream would be better, there is a table metadata api
-# class EmploymentHistoryStatus(TapTemplateStream):
-#     name = "tables_employmentstatus"
-#     path = "/employees/changed/tables/employmentStatus"
-#     primary_keys = ["employee_id", "date", "employmentStatus"]
-#     replication_key = None
-#     schema_filepath = SCHEMAS_DIR / "employmentstatus.json"
-
-#     def get_url_params(
-#         self, context: Optional[dict], next_page_token: Optional[Any]
-#     ) -> Dict[str, Any]:
-#         return {"since":"2012-01-01T00:00:00Z"} #I want all of the data, 2012 is far enough back and referenced in the API Docs
-    
 #     def parse_response(self, response: requests.Response) -> Iterable[dict]:
-#         """Parse the response and return an iterator of result rows.
+#         """Parse the response and return an iterator of result records."""
+#         # TODO: Parse response body and return a set of records.
+#         yield from extract_jsonpath(self.records_jsonpath, input=response.json())
 
-#         Args:
-#             response: A raw `requests.Response`_ object.
-
-#         Yields:
-#             One item for every item found in the response.
-
-#         .. _requests.Response:
-#             https://docs.python-requests.org/en/latest/api/#requests.Response
-#         """
-#         for employeeid, value in response.json()["employees"].items():
-#             last_changed = value["lastChanged"]
-#             rows = value["rows"]
-#             for row in rows:
-#                 row.update({"lastChanged":last_changed})
-#                 row.update({"employee_id":employeeid})
-#                 yield row
+#     def post_process(self, row: dict, context: Optional[dict]) -> dict:
+#         """As needed, append or transform raw data to match expected structure."""
+#         # TODO: Delete this method if not needed.
+#         return row

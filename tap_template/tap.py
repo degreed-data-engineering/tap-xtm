@@ -22,9 +22,11 @@ class TapTemplate(Tap):
 
     name = "tap-template"
     config_jsonschema = th.PropertiesList(
-        th.Property("api_key", th.StringType, required=True, description="datadog api key"),
-        th.Property("app_key", th.StringType, required=True, description="datadog app key"),
-        th.Property("start_date", th.StringType, required=True, description="start date for sync"),
+        th.Property("url_base", th.StringType, required=False, description="Url base for the source endpoint"),
+        th.Property("api_key", th.StringType, required=False, description="API key"),
+        th.Property("app_key", th.StringType, required=False, description="Application key"),
+        th.Property("api_token", th.StringType, required=False, description="api token for Basic auth"),
+        th.Property("start_date", th.StringType, required=False, description="start date for sync"),
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:
@@ -34,5 +36,5 @@ class TapTemplate(Tap):
         return streams
 
 
-# # # CLI Execution:
+# CLI Execution:
 cli = TapTemplate.cli

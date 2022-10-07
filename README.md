@@ -1,74 +1,178 @@
 # `tap-template`
-Tap was created by [AutoIDM](https://autoidm.com). Check us out for tap/target creation, maintenace, support, and more!
+This tap template was created by Degreed as a template to be used for extracting data via Meltano into defined targets
 
-## Capabilities
 
-* `catalog`
-* `state`
-* `discover`
-* `about`
-* `stream-maps`
+## tap-template
 
-## Settings
-| Setting       | Required | Default | Description |
-|:--------------|:--------:|:-------:|:------------|
-| auth_token    | True     | None    | Token gathered from template, instructions are [here](https://documentation.template.com/docs#section-authentication) |
-| subdomain     | True     | None    | subdomain from template |
-| custom_reports| False    | None    | CustomReport full body definition, example in meltano.yml, same format as the Body for the POST request [here](https://documentation.template.com/reference/request-custom-report-1) |
+These are the steps required for using this repo as a 'template' for a Meltano extractor. Note: we will use tap-datadog as the example throughout the process.
+
+1.  Being aware of case sensitivity, replace the following throughout the repo:
+
+* `tap-template` >`tap-datadog` 
+* `tap_template` > `tap_datadog`
+* `TapTemplateStream` > `TapDatadogStream` (inside `streams.py`)
+
+2. Update the following folders/files to:
+* `tap_template` > `tap_datadog`
+* `tap-template.sh` > `tap-datadog.sh`
+
+3. Inside `streams.py` update TapTemplateStream with the authentication used for the tap-datadog api calls.  Note: all streams in streams.py work as a heirarchy further down. i.e. you can replace the http headers in another stream
+
+4. Using `Events(TapTemplateStream)` as an example, build your first stream to be synced. There are comments to help identify what values to use 
+
+For setting the records_jsonpath value in the stream, you can use a tool likle postman to make a sample call and view the response json.  After identifying what keys and values you need to extract, you will need to narrow down the json path. This is a helpful site that you can paste the response text in and help locate the correct path to use.  In this example, we want to only extract the `id` and `type` values inside `data`:
+
+```json
+{
+    "meta": {
+        "page": {
+            "after": "293048209rudjkfjdsf"
+        }
+    },
+    "data": [
+        {
+            "type": "error",
+            "id": "234234324324234"
+        },
+        {
+            "type": "log",
+            "id": "2342123123"
+        },
+        {
+            "type": "log",
+            "id": "09823044ugkdf"
+        }
+    ],
+    "links": {
+        "next": "https://api.datadoghq.com/api/v2/logs/events?..."
+    }
+}
+```
+
+Using the link above and entering the value $.data[*], the correct fields are now displaying, confirming that is the correct path:
+
+```json
+[
+  {
+    "type": "error",
+    "id": "234234324324234"
+  },
+  {
+    "type": "log",
+    "id": "2342123123"
+  },
+  {
+    "type": "log",
+    "id": "09823044ugkdf"
+  }
+]
+```
+
+For the schema, you can create the .json file and place it in the schemas/ folder, or you can create the schema on the fly using the eample in the Events stream
+
+- **Option 1:** Adding the `events.json` file to the schemas/ folder:
+```json
+{
+        "type": "object",
+        "properties": {
+                "id": {
+                        "type": "string"
+                },
+                "type": {
+                        "type": "string"
+                }
+        }
+}
+```
+
+- **Option 2:** Defining schema using hte PropertiesList in the stream `class`: 
+```python
+schema = th.PropertiesList(
+        th.Property("id", th.NumberType),
+        th.Property("name", th.StringType),
+    ).to_dict()
+```
+
+5. In `tap.py` add each stream added in `streams.py` to `STREAM_TYPES` and define the configuration required:
+
+```python
+    config_jsonschema = th.PropertiesList(
+        th.Property("api_token", th.StringType, required=False, description="api token for Basic auth"),
+        th.Property("start_date", th.StringType, required=False, description="start date for sync"),
+    ).to_dict()
+```
+
+6. After updating those components and confirming all references to `template` or `Template` have been updated, you can test the tap locally.
+
+## Testing locally
+
+To test locally, pipx poetry
+```bash
+pipx install poetry
+```
+
+Install poetry for the package
+```bash
+poetry install
+```
+
+To confirm everything is setup properly, run the following: 
+```bash
+poetry run tap-template --help
+```
+
+To run the tap locally outside of Meltano and view the response in a text file, run the following: 
+```bash
+poetry run tap-template > output.txt 
+```
 
 A full list of supported settings and capabilities is available by running: `tap-template --about`
 
-
-## Getting Started
-    ```bash
-    pipx install poetry
-    poetry install
-    ```
-    ```bash
-    poetry run tap-template --help
-    ```
-    ```bash
-    poetry run pytest
-    ```
-## Singer SDK Dev Guide
-
-See the [dev guide](../../docs/dev_guide.md) for more instructions on how to use the Singer SDK to 
-develop your own taps and targets.
-
 ## Config Guide
 
-### Accepted Config Options
+To test locally, create a `config.json` with required config values in your tap_template folder (i.e. `tap_template/config.json`)
 
-- [ ] `TODO:` Provide a list of config options accepted by the tap.
-
-### Source Authentication and Authorization
-
-- [ ] `TODO:` If your tap requires special access on the source system, or any special authentication requirements, provide those here.
-This Singer-compliant tap was created using the [Singer SDK](https://gitlab.com/meltano/singer-sdk).
-
-### Testing with [Meltano](https://www.meltano.com)
-
-_**Note:** This tap will work in any Singer environment and does not require Meltano.
-
-Install Meltano (if you haven't already) and any needed plugins:
-
-```bash
-# Install meltano
-pipx install meltano
-# Initialize meltano within this directory
-cd tap-clickup
-meltano install
+```json
+{
+  "api_key": "$DD_API_KEY",
+  "app_key": "$DD_APP_KEY",
+  "start_date": "2022-10-05T00:00:00Z"
+}
 ```
 
-Now you can test and orchestrate using Meltano:
+**note**: It is critical that you delete the config.json before pushing to github.  You do not want to expose an api key or token 
+### Add to Meltano 
 
-```bash
-# Test invocation:
-meltano invoke tap-clickup --version
-# OR run a test `elt` pipeline:
-meltano elt tap-clickup target-jsonl
-```
+The provided `meltano.yml` provides the correct setup for the tap to be installed in the data-houston repo.  
 
-### SDK
+At this point you should move all your updated tap files into its own tap-datadog github repo. You also want to make sure you update in the `setup.py` the `url` of the repo for you tap.
 
-Built with the [Meltano SDK](https://sdk.meltano.com) for Singer Taps and Targets.
+Update the following in meltano within the data-houston repo with the new tap-datadog credentials/configuration.
+
+```yml
+plugins:
+  extractors:
+  - name: tap-datadog
+    namespace: tap_datadog
+    pip_url: git+https://github.com/degreed-data-engineering/tap-datadog
+    capabilities:
+    - state
+    - catalog
+    - discover
+    config:
+      api_key: $DD_API_KEY
+      app_key: $DD_APP_KEY
+      start_date: '2022-10-05T00:00:00Z'
+ ```
+
+To test in data-houston, run the following:
+1. `make meltano` - spins up meltano
+2. `meltano install extractor tap-datadog` - installs the tap
+3. `meltano invoke tap-datadog --discover > catalog.json` - tests the catalog/discovery
+3. `meltano invoke tap-datadog > output.txt` - runs tap with .txt output in `meltano/degreed/`
+
+That should be it! Feel free to contribute to the tap to help add functionality for any future sources
+## Singer SDK Dev Guide
+
+See the [dev guide](https://sdk.meltano.com/en/latest/index.html) for more instructions on how to use the Singer SDK to 
+develop your own taps and targets.
