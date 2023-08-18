@@ -11,7 +11,7 @@ from tap_template.streams import (
     Events,
 )
 
-PLUGIN_NAME = "tap-template"
+PLUGIN_NAME = "tap-xtm"
 
 STREAM_TYPES = [ 
     Events,
@@ -20,7 +20,7 @@ STREAM_TYPES = [
 class TapTemplate(Tap):
     """template tap class."""
 
-    name = "tap-template"
+    name = "tap-xtm"
     config_jsonschema = th.PropertiesList(
         th.Property("url_base", th.StringType, required=False, description="Url base for the source endpoint"),
         th.Property("api_key", th.StringType, required=False, description="API key"),

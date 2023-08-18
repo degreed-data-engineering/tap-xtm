@@ -1,4 +1,4 @@
-"""Stream class for tap-template."""
+"""Stream class for tap-xtm."""
 
 import base64
 import json
@@ -14,8 +14,8 @@ import requests
 
 SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
-class TapTemplateStream(RESTStream):
-    """Template stream class."""
+class TapXtmStream(RESTStream):
+    """xtm stream class."""
     
     _LOG_REQUEST_METRIC_URLS: bool = True
     @property
