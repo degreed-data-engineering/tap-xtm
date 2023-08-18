@@ -21,7 +21,7 @@ class TapXtmStream(RESTStream):
     @property
     def url_base(self) -> str:
         """Base URL of source"""
-        return f"https://api.datadoghq.com"
+        return self.config["api_url"]
 
     @property
     def http_headers(self) -> dict:
@@ -33,52 +33,36 @@ class TapXtmStream(RESTStream):
 
     @property
     def authenticator(self):
-        http_headers = {}
-
-        # If only api_token is provided, use "Basic 123456789abcdefghijklmnopqrstuv" authentication
-        if self.config.get("api_token") and not self.config.get("api_key") and not self.config.get("app_key"):
-            http_headers["Authorization"] = "Basic " +  self.config.get("api_token")
-
-
-        # If api and app keys are provided, and POST required:
-        if self.config.get("api_key") and self.config.get("app_key"):
-            http_headers["DD-API-KEY"] = self.config.get("api_key")
-            http_headers["DD-APPLICATION-KEY"] = self.config.get("app_key")
-
+        authorization_key = self.config.get("authorization")
+        http_headers = {
+            "Authorization": f'XTM-Basic {authorization_key}'
+        }
         return SimpleAuthenticator(stream=self, auth_headers=http_headers)
 
-class Events(TapTemplateStream):
-    name = "events" # Stream name 
-    path = "/api/v2/logs/events/search" # API endpoint after base_url 
+class Projects(TapXtmStream):
+    name = "projects" # Stream name 
+    path = "/projects" # API endpoint after base_url 
     primary_keys = ["id"]
-    records_jsonpath = "$.data[*]" # https://jsonpath.com Use requests response json to identify the json path 
+    records_jsonpath = "$.projects[*]" # https://jsonpath.com Use requests response json to identify the json path 
     replication_key = None
-    #schema_filepath = SCHEMAS_DIR / "events.json"  # Optional: use schema_filepath with .json inside schemas/ 
 
-    # Optional: If using schema_filepath, remove the propertyList schema method below
     schema = th.PropertiesList(
         th.Property("id", th.NumberType),
         th.Property("name", th.StringType),
+        th.Property("status", th.StringType),
+        th.Property("activity", th.StringType),
+        th.Property("joinFilesType", th.StringType),
     ).to_dict()
-    # Overwrite GET here by updating rest_method
-    rest_method = "POST"
 
-    def prepare_request_payload(
-        self, context: Optional[dict], next_page_token: Optional[Any]
-    ) -> Optional[dict]:
-        """Define request parameters to return"""
-        payload = {"filter": {"query": "source:degreed.api env:production","from": self.config.get("start_date")},"page": {"limit": 4}}
-        return payload
+    # {
+    #     "id": 21179968,
+    #     "name": "[wpml][Security en] ID 102",
+    #     "status": "STARTED",
+    #     "activity": "ACTIVE",
+    #     "joinFilesType": "NOT_JOINED"
+    # },
 
-    # For passing url parameters: 
-    # def get_url_params(
-    #     self, context: Optional[dict], next_page_token: Optional[Any]
-    # ) -> Dict[str, Any]:
-
-
-
-
-
+# https://www.xtm-cloud.com/project-manager-api-rest/projects/{{project_id}}/statistics?
 
 ### Template to use for new stream 
 # class TemplateStream(RESTStream):

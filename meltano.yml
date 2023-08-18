@@ -12,8 +12,8 @@ plugins:
     - discover
     config:
       api_key: API-KEY
-      app_key: APP-KEY
-      start_date: '2022-10-05T00:00:00Z'
+      api_url: https://www.xtm-cloud.com/project-manager-api-rest/
+      start_date: '2021-01-01T00:00:00Z'
   
   loaders:
   - name: target-jsonl

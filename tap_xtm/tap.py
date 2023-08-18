@@ -1,4 +1,4 @@
-"""template tap class."""
+"""xtm tap class."""
 
 from pathlib import Path
 from typing import List
@@ -7,24 +7,24 @@ import click
 from singer_sdk import Tap, Stream
 from singer_sdk import typing as th
 
-from tap_template.streams import (
-    Events,
+from tap_xtm.streams import (
+    Projects,
 )
 
 PLUGIN_NAME = "tap-xtm"
 
 STREAM_TYPES = [ 
-    Events,
+    Projects,
 ]
 
-class TapTemplate(Tap):
-    """template tap class."""
+class TapXtm(Tap):
+    """xtm tap class."""
 
     name = "tap-xtm"
     config_jsonschema = th.PropertiesList(
         th.Property("url_base", th.StringType, required=False, description="Url base for the source endpoint"),
         th.Property("api_key", th.StringType, required=False, description="API key"),
-        th.Property("app_key", th.StringType, required=False, description="Application key"),
+        th.Property("api_url", th.StringType, required=False, description="API URL"),
         th.Property("api_token", th.StringType, required=False, description="api token for Basic auth"),
         th.Property("start_date", th.StringType, required=False, description="start date for sync"),
     ).to_dict()
@@ -37,4 +37,4 @@ class TapTemplate(Tap):
 
 
 # CLI Execution:
-cli = TapTemplate.cli
+cli = TapXtm.cli
