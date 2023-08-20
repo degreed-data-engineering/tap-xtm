@@ -33,7 +33,7 @@ class TapXtmStream(RESTStream):
 
     @property
     def authenticator(self):
-        authorization_key = self.config.get("authorization")
+        authorization_key = self.config.get("api_token")
         http_headers = {
             "Authorization": f'XTM-Basic {authorization_key}'
         }

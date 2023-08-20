@@ -11,7 +11,7 @@ plugins:
     - catalog
     - discover
     config:
-      api_key: API-KEY
+      api_token: API-TOKEN
       api_url: https://www.xtm-cloud.com/project-manager-api-rest/
       start_date: '2021-01-01T00:00:00Z'
   
