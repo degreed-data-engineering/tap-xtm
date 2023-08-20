@@ -59,19 +59,39 @@ class Projects(TapXtmStream):
         """Return a context dictionary for child streams."""
         return {"project_id": record["id"]}
 
+    def get_next_page_token(
+        self, response: requests.Response, previous_token: Optional[Any]
+    ) -> Optional[Any]:
+        """Return a token for identifying next page or None if no more pages."""
+        current_page = int(response.headers.get("xtm-page", 1))
+        max_item_size = int(response.headers.get("xtm-page-size", 1000))
+        page_item_count = int(response.headers.get("xtm-page-items-count", 1000))
 
-# https://www.xtm-cloud.com/project-manager-api-rest/projects/{{project_id}}/statistics?
+        if max_item_size == page_item_count:
+            return current_page + 1
+
+        return None
+
+    def get_url_params(
+        self, context: Optional[dict], next_page_token: Optional[Any]
+    ) -> Dict[str, Any]:
+        """Return a dictionary of values to be used in URL parameterization."""
+        params: dict = {}
+        if next_page_token:
+            params["page"] = next_page_token
+        return params
 
 
 class ProjectStats(TapXtmStream):
     name = "projectstats"  # Stream name
     parent_stream_type = Projects
     path = "/projects/{project_id}/statistics?"  # API endpoint after base_url
-    primary_keys = ["targetLanguage"]
+    primary_keys = ["project_id", "targetLanguage"]
     records_jsonpath = "$[*]"  # https://jsonpath.com Use requests response json to identify the json path
     replication_key = None
 
     schema = th.PropertiesList(
+        th.Property("project_id", th.NumberType),
         th.Property("targetLanguage", th.StringType),
         th.Property(
             "usersStatistics",
@@ -126,4 +146,3 @@ class ProjectStats(TapXtmStream):
     def post_process(self, row: dict, context: Optional[dict]) -> dict:
         row["project_id"] = context["project_id"]
         return row
-

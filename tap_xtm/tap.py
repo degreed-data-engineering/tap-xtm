@@ -31,19 +31,12 @@ class TapXtm(Tap):
             required=False,
             description="Url base for the source endpoint",
         ),
-        th.Property("api_key", th.StringType, required=False, description="API key"),
         th.Property("api_url", th.StringType, required=False, description="API URL"),
         th.Property(
             "api_token",
             th.StringType,
             required=False,
             description="api token for Basic auth",
-        ),
-        th.Property(
-            "start_date",
-            th.StringType,
-            required=False,
-            description="start date for sync",
         ),
     ).to_dict()
 
