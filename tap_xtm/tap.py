@@ -9,29 +9,47 @@ from singer_sdk import typing as th
 
 from tap_xtm.streams import (
     Projects,
+    ProjectStats,
 )
 
 PLUGIN_NAME = "tap-xtm"
 
-STREAM_TYPES = [ 
+STREAM_TYPES = [
     Projects,
+    ProjectStats,
 ]
+
 
 class TapXtm(Tap):
     """xtm tap class."""
 
     name = "tap-xtm"
     config_jsonschema = th.PropertiesList(
-        th.Property("url_base", th.StringType, required=False, description="Url base for the source endpoint"),
+        th.Property(
+            "url_base",
+            th.StringType,
+            required=False,
+            description="Url base for the source endpoint",
+        ),
         th.Property("api_key", th.StringType, required=False, description="API key"),
         th.Property("api_url", th.StringType, required=False, description="API URL"),
-        th.Property("api_token", th.StringType, required=False, description="api token for Basic auth"),
-        th.Property("start_date", th.StringType, required=False, description="start date for sync"),
+        th.Property(
+            "api_token",
+            th.StringType,
+            required=False,
+            description="api token for Basic auth",
+        ),
+        th.Property(
+            "start_date",
+            th.StringType,
+            required=False,
+            description="start date for sync",
+        ),
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:
         """Return a list of discovered streams."""
-        streams =  [stream_class(tap=self) for stream_class in STREAM_TYPES]
+        streams = [stream_class(tap=self) for stream_class in STREAM_TYPES]
 
         return streams
 
