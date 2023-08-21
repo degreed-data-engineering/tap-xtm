@@ -31,9 +31,7 @@ To test locally, create a `config.json` with required config values in your tap_
 
 ```json
 {
-  "api_key": "$DD_API_KEY",
-  "app_key": "$DD_APP_KEY",
-  "start_date": "2022-10-05T00:00:00Z"
+  "api_token": "$API_TOKEN",
 }
 ```
 
@@ -58,9 +56,8 @@ plugins:
     - catalog
     - discover
     config:
-      api_key: $DD_API_KEY
-      app_key: $DD_APP_KEY
-      start_date: '2022-10-05T00:00:00Z'
+      api_token: $API_TOKEN
+      api_url: https://www.xtm-cloud.com/project-manager-api-rest/
  ```
 
 To test in data-houston, run the following:
