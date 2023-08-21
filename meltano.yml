@@ -3,17 +3,16 @@ send_anonymous_usage_stats: true
 project_id: 4935d052-aee1-46fa-89f0-a94cdc080064
 plugins:
   extractors:
-  - name: tap-template
-    namespace: tap_template
-    executable: ./tap-template.sh
+  - name: tap-xtm
+    namespace: tap_xtm
+    executable: ./tap-xtm.sh
     capabilities:
     - state
     - catalog
     - discover
     config:
-      api_key: API-KEY
-      app_key: APP-KEY
-      start_date: '2022-10-05T00:00:00Z'
+      api_token: API-TOKEN
+      api_url: https://www.xtm-cloud.com/project-manager-api-rest/
   
   loaders:
   - name: target-jsonl
@@ -24,4 +23,4 @@ environments:
   config:
     plugins:
       extractors:
-      - name: tap-template
+      - name: tap-xtm

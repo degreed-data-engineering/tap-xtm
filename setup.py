@@ -1,13 +1,13 @@
 from setuptools import setup, find_packages
 
 
-setup(name = "tap-template",
+setup(name = "tap-xtm",
     version = 0.1,
-    description = "Template for Degreed taps in Meltano",
+    description = "XTM for Degreed taps in Meltano",
 
     author = "Degreed",
     author_email = "",
-    url = "https://github.com/degreed-data-engineering/tap-template",
+    url = "https://github.com/degreed-data-engineering/tap-xtm",
     packages = find_packages(),
     package_data = {},
     include_package_data = True,
