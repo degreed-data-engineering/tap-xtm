@@ -146,3 +146,56 @@ class ProjectStats(TapXtmStream):
     def post_process(self, row: dict, context: Optional[dict]) -> dict:
         row["project_id"] = context["project_id"]
         return row
+
+
+class ProjectMetrics(TapXtmStream):
+    name = "projectmetrics"  # Stream name
+    parent_stream_type = Projects
+    path = "/projects/{project_id}/metrics/"  # API endpoint after base_url
+    primary_keys = ["project_id", "targetLanguage"]
+    records_jsonpath = "$[*]"  # https://jsonpath.com Use requests response json to identify the json path
+    replication_key = None
+
+    schema = th.PropertiesList(
+        th.Property("project_id", th.NumberType),
+        th.Property("targetLanguage", th.StringType),
+        th.Property(
+            "coreMetrics",
+            th.ObjectType(
+                th.Property("iceMatchCharacters", th.NumberType),
+                th.Property("iceMatchSegments", th.NumberType),
+            ),
+        ),
+        th.Property(
+            "metricsProgress",
+            th.ObjectType(
+                th.Property("wordsToBeDone", th.NumberType),
+                th.Property("wordsDone", th.NumberType),
+            ),
+        ),
+        th.Property(
+            "jobsMetrics",
+            th.ArrayType(
+                th.ObjectType(
+                    th.Property("jobId", th.NumberType),
+                    th.Property(
+                        "coreMetrics",
+                        th.ObjectType(
+                            th.Property("iceMatchCharacters", th.NumberType),
+                            th.Property("iceMatchSegments", th.NumberType),
+                        ),
+                    ),
+                    th.Property(
+                        "metricsProgress",
+                        th.ObjectType(
+                            th.Property("MT Post editing1", th.NumberType),
+                        ),
+                    ),
+                )
+            ),
+        ),
+    ).to_dict()
+
+    def post_process(self, row: dict, context: Optional[dict]) -> dict:
+        row["project_id"] = context["project_id"]
+        return row
