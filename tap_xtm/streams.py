@@ -9,6 +9,7 @@ from functools import cached_property
 from singer_sdk import typing as th
 from singer_sdk.streams import RESTStream
 from singer_sdk.authenticators import SimpleAuthenticator
+from singer_sdk.exceptions import FatalAPIError
 import requests
 
 
@@ -81,6 +82,53 @@ class Projects(TapXtmStream):
             params["page"] = next_page_token
         return params
 
+class ProjectDetails(TapXtmStream):
+    name = "projectdetails"  # Stream name
+    parent_stream_type = Projects
+    path = "/projects/{project_id}/"  # API endpoint after base_url
+    primary_keys = ["id"]
+    records_jsonpath = "$[*]"  # https://jsonpath.com Use requests response json to identify the json path
+    replication_key = None
+
+    schema = th.PropertiesList(
+        th.Property("id", th.NumberType),
+        th.Property("name", th.StringType),
+        th.Property("activity", th.StringType),
+        th.Property("creatorId", th.NumberType),
+        th.Property("customerId", th.NumberType),
+        th.Property("customerName", th.StringType),
+        th.Property("projectManagerId", th.NumberType),
+        th.Property("sourceLanguage", th.StringType),
+        th.Property("targetLanguages", th.StringType),
+        th.Property("templateId", th.NumberType),
+        th.Property("filterTemplateId", th.StringType),
+        th.Property("createDate", th.NumberType),
+        th.Property("startDates", th.NumberType),
+        th.Property("finishDate", th.NumberType),
+        th.Property("dueDate", th.NumberType),
+        th.Property("proposalApprovalStatus", th.StringType),
+        th.Property("subjectMatterId", th.NumberType),
+        th.Property("subjectMatterName", th.StringType),
+        th.Property("tmPenaltyProfileId", th.NumberType),
+        th.Property("qaProfileId", th.NumberType),
+        th.Property("segmentLockingType", th.StringType),
+    ).to_dict()
+
+    def post_process(self, row: dict, context: Optional[dict]) -> dict:
+        row["project_id"] = context["project_id"]
+        return row
+
+    def request_records(self, context: Optional[dict]) -> Iterable[dict]:
+        """Request records for the stream, handling 404 errors specifically."""
+        try:
+            yield from super().request_records(context)
+        except FatalAPIError as e:
+            if "404 Client Error" in str(e):
+                self.logger.warn(
+                    f"Project ID {context.get('project_id')} not found. Skipping."
+                )
+            else:
+                raise
 
 class ProjectStats(TapXtmStream):
     name = "projectstats"  # Stream name
