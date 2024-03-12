@@ -9,17 +9,14 @@ from singer_sdk import typing as th
 
 from tap_xtm.streams import (
     Projects,
+    ProjectDetails,
     ProjectStats,
     ProjectMetrics,
 )
 
 PLUGIN_NAME = "tap-xtm"
 
-STREAM_TYPES = [
-    Projects,
-    ProjectStats,
-    ProjectMetrics
-]
+STREAM_TYPES = [Projects, ProjectDetails, ProjectStats, ProjectMetrics]
 
 
 class TapXtm(Tap):

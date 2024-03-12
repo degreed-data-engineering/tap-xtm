@@ -82,6 +82,7 @@ class Projects(TapXtmStream):
             params["page"] = next_page_token
         return params
 
+
 class ProjectDetails(TapXtmStream):
     name = "projectdetails"  # Stream name
     parent_stream_type = Projects
@@ -129,6 +130,7 @@ class ProjectDetails(TapXtmStream):
                 )
             else:
                 raise
+
 
 class ProjectStats(TapXtmStream):
     name = "projectstats"  # Stream name
