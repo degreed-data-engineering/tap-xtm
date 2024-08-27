@@ -249,3 +249,15 @@ class ProjectMetrics(TapXtmStream):
     def post_process(self, row: dict, context: Optional[dict]) -> dict:
         row["project_id"] = context["project_id"]
         return row
+
+    def request_records(self, context: Optional[dict]) -> Iterable[dict]:
+        try:
+            yield from super().request_records(context)
+        except FatalAPIError as e:
+            if "403 Client Error" in str(e):
+                self.logger.warn(
+                    f"Project ID {context.get('project_id')} is under analysis. Skipping."
+                )
+                return []
+            else:
+                raise
