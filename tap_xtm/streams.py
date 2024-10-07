@@ -125,7 +125,7 @@ class ProjectDetails(TapXtmStream):
             yield from super().request_records(context)
         except FatalAPIError as e:
             if "404 Client Error" in str(e):
-                self.logger.warn(
+                self.logger.warning(
                     f"Project ID {context.get('project_id')} not found. Skipping."
                 )
             else:
@@ -197,6 +197,18 @@ class ProjectStats(TapXtmStream):
         row["project_id"] = context["project_id"]
         return row
 
+    def request_records(self, context: Optional[dict]) -> Iterable[dict]:
+        try:
+            yield from super().request_records(context)
+        except FatalAPIError as e:
+            if "404 Client Error" in str(e):
+                self.logger.warning(
+                    f"Jobs do not exist in the project {context.get('project_id')}. Skipping."
+                )
+                return []
+            else:
+                raise
+
 
 class ProjectMetrics(TapXtmStream):
     name = "projectmetrics"  # Stream name
@@ -255,8 +267,13 @@ class ProjectMetrics(TapXtmStream):
             yield from super().request_records(context)
         except FatalAPIError as e:
             if "403 Client Error" in str(e):
-                self.logger.warn(
+                self.logger.warning(
                     f"Project ID {context.get('project_id')} is under analysis. Skipping."
+                )
+                return []
+            elif "404 Client Error" in str(e):
+                self.logger.warning(
+                    f"Unavailable data for Project ID {context.get('project_id')}. Skipping."
                 )
                 return []
             else:
