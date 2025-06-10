@@ -206,6 +206,11 @@ class ProjectStats(TapXtmStream):
                     f"Jobs do not exist in the project {context.get('project_id')}. Skipping."
                 )
                 return []
+            elif "400 Client Error" in str(e):
+                self.logger.warning(
+                    f"Failed to process the 'statistics' API endpoint for project ID {context.get('project_id')}. Skipping."
+                )
+                return []
             else:
                 raise
 
