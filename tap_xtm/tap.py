@@ -1,9 +1,6 @@
 """xtm tap class."""
 
-from pathlib import Path
 from typing import List
-import logging
-import click
 from singer_sdk import Tap, Stream
 from singer_sdk import typing as th
 
@@ -12,11 +9,12 @@ from tap_xtm.streams import (
     ProjectDetails,
     ProjectStats,
     ProjectMetrics,
+    ProjectStatsEDC,
 )
 
 PLUGIN_NAME = "tap-xtm"
 
-STREAM_TYPES = [Projects, ProjectDetails, ProjectStats, ProjectMetrics]
+STREAM_TYPES = [Projects, ProjectDetails, ProjectStats, ProjectMetrics, ProjectStatsEDC]
 
 
 class TapXtm(Tap):

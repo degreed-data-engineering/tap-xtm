@@ -1,16 +1,15 @@
 """Stream class for tap-xtm."""
 
-import base64
-import json
-from typing import Dict, Optional, Any, Iterable
+import re
+import random
+import requests
+
 from pathlib import Path
-from singer_sdk import typing
-from functools import cached_property
 from singer_sdk import typing as th
 from singer_sdk.streams import RESTStream
-from singer_sdk.authenticators import SimpleAuthenticator
 from singer_sdk.exceptions import FatalAPIError
-import requests
+from typing import Dict, Optional, Any, Iterable
+from singer_sdk.authenticators import SimpleAuthenticator
 
 
 SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
@@ -283,3 +282,67 @@ class ProjectMetrics(TapXtmStream):
                 return []
             else:
                 raise
+
+
+class ProjectStatsEDC(TapXtmStream):
+    name = "projectstatsedc"
+    parent_stream_type = Projects
+    path = "/projects/{project_id}/statistics/edc"  # API endpoint after base_url
+    records_jsonpath = "$[*]"  # https://jsonpath.com Use requests response json to identify the json path
+    primary_keys = ["project_id"]
+    replication_key = None
+
+    def backoff(self, retry_count):
+        base = min(2**retry_count, 30)  # exponential backoff capped at 30s
+        jitter = random.uniform(0, 1)
+        return base + jitter
+
+    def get_url_params(self, context: dict, next_page_token: Optional[Any]) -> dict:
+        return {
+            "fetchLevel": "JOBS",
+            "statisticsFetchType": "DELETED",
+            "edcScoreType": "AVERAGE",
+        }
+
+    schema = th.PropertiesList(
+        th.Property("project_id", th.NumberType),
+        th.Property("fetchLevel", th.StringType),
+        th.Property("statisticsFetchType", th.StringType),
+        th.Property("edcScoreType", th.StringType),
+        th.Property("score", th.NumberType),
+        th.Property(
+            "jobs",
+            th.ArrayType(
+                th.ObjectType(
+                    th.Property("id", th.NumberType),
+                    th.Property("score", th.NumberType),
+                )
+            ),
+        ),
+    ).to_dict()
+
+    def post_process(self, row: dict, context: Optional[dict]) -> dict:
+        row["project_id"] = context["project_id"]
+        row["fetchLevel"] = "JOBS"
+        row["statisticsFetchType"] = "DELETED"
+        row["edcScoreType"] = "AVERAGE"
+        return row
+
+    def request_records(self, context: Optional[dict]) -> Iterable[dict]:
+        try:
+            yield from super().request_records(context)
+        except FatalAPIError as e:
+            # Fallback: try to parse from error message string (last resort)
+
+            match = re.search(r"(\d{3}) Client Error", str(e))
+            if match:
+                status_code = int(match.group(1))
+
+            # Handle 4xx client errors generically
+            if status_code and 400 <= status_code < 500:
+                self.logger.warning(
+                    f"Client error {status_code} for project {context.get('project_id')}. Skipping."
+                )
+                return []
+            # For other errors (5xx server errors or unknown), re-raise
+            raise
