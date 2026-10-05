@@ -6,6 +6,7 @@ import requests
 
 from pathlib import Path
 from singer_sdk import typing as th
+from singer_sdk.helpers._typing import TypeConformanceLevel
 from singer_sdk.streams import RESTStream
 from singer_sdk.exceptions import FatalAPIError
 from typing import Dict, Optional, Any, Iterable
@@ -17,6 +18,16 @@ SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 class TapXtmStream(RESTStream):
     """xtm stream class."""
+
+    # singer-sdk >= 0.17 defaults to RECURSIVE type conformance, which strips every nested
+    # key that is not declared in the stream schema (e.g. projectstats
+    # usersStatistics[].stepsStatistics[].jobsStatistics[].lastCompletionDate, read by dbt
+    # LocalizationProjectMetrics) and logs one warning line per record listing every
+    # stripped path. For large projects that log line exceeds Meltano's 5 MiB stderr limit
+    # (elt.buffer_size // 2) and kills the run: "Separator is not found, and chunk exceed
+    # the limit". singer-sdk 0.3.17 only filtered top-level keys; ROOT_ONLY keeps that
+    # behaviour so nested objects/arrays pass through untouched. (PD-133924)
+    TYPE_CONFORMANCE_LEVEL = TypeConformanceLevel.ROOT_ONLY
 
     _LOG_REQUEST_METRIC_URLS: bool = True
 
